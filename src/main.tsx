@@ -7,6 +7,7 @@ import { OrdersPage } from './features/orders/OrdersPage';
 import { OrderDetailPage } from './features/orders/OrderDetailPage';
 import { CreateOrderPage } from './features/orders/CreateOrderPage';
 import { Layout } from './components/Layout';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import './index.css';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -15,6 +16,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <TooltipProvider delayDuration={200}>
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -32,5 +34,6 @@ createRoot(document.getElementById('root')!).render(
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </TooltipProvider>
   </StrictMode>,
 );
