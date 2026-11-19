@@ -2,7 +2,7 @@ import { LogOut, Plus, ReceiptText } from 'lucide-react';
 import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { clearToken } from '../lib/api';
+import { api } from '../lib/api';
 
 const navItem = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -13,8 +13,8 @@ const navItem = ({ isActive }: { isActive: boolean }) =>
 export function Layout() {
   const navigate = useNavigate();
 
-  function logout() {
-    clearToken();
+  async function logout() {
+    await api('/auth/logout', { method: 'POST' }).catch(() => null);
     navigate('/login');
   }
 

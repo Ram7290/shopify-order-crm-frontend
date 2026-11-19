@@ -83,7 +83,7 @@ export function OrdersPage() {
   function connectStore(event: FormEvent) {
     event.preventDefault();
     const shop = shopInput.trim();
-    const base = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api';
+    const base = import.meta.env.VITE_API_BASE_URL ?? '/api';
     window.location.href = `${base}/shopify/install?shop=${encodeURIComponent(shop)}`;
   }
 

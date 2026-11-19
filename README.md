@@ -23,9 +23,9 @@ Make sure the backend's `FRONTEND_URL` matches the address shown by Vite, otherw
 
 | Name | Description |
 | --- | --- |
-| `VITE_API_BASE_URL` | Backend API base URL, including `/api`. Example: `https://your-backend.onrender.com/api` |
+| `VITE_API_BASE_URL` | API base path. Keep the default `/api`. Vercel forwards `/api/*` to the backend (see `vercel.json`), and the dev server proxies it to `localhost:3000` |
 
-Variables starting with `VITE_` are embedded in the built JavaScript, so never put secrets in them.
+The login token is kept in an HTTP-only cookie, so the browser code never reads it. Variables starting with `VITE_` are embedded in the built JavaScript, so never put secrets in them.
 
 ## Scripts
 
@@ -38,6 +38,6 @@ Variables starting with `VITE_` are embedded in the built JavaScript, so never p
 ## Deployment (Vercel)
 
 1. Import this repository in Vercel. The framework preset is **Vite**.
-2. Set the environment variable `VITE_API_BASE_URL` to the Render backend URL with `/api` at the end.
-3. Deploy. `vercel.json` rewrites all routes to `index.html`, so refreshing deep links such as `/orders/123` works.
+2. Do not set `VITE_API_BASE_URL` on Vercel (or set it to `/api`). `vercel.json` forwards `/api/*` to the Render backend, so the login cookie belongs to the Vercel domain.
+3. Deploy. The rewrites also send all other routes to `index.html`, so refreshing deep links such as `/orders/123` works.
 4. Copy the Vercel URL into the backend's `FRONTEND_URL` on Render.

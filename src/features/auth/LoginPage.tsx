@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { api, ApiError, setToken } from '../../lib/api';
+import { api, ApiError } from '../../lib/api';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -20,11 +20,10 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const result = await api<{ accessToken: string }>('/auth/login', {
+      await api('/auth/login', {
         method: 'POST',
         body: { email, password },
       });
-      setToken(result.accessToken);
       navigate('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not log in');
