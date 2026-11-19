@@ -1,10 +1,31 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { api, ApiError } from '../../lib/api';
-import { OrderListResponse, ShopifyStatus, SyncSummary } from '../../types';
 import { formatDate, formatMoney } from '../../lib/format';
+import { OrderListResponse, ShopifyStatus, SyncSummary } from '../../types';
 
-const STATUSES = ['', 'PENDING', 'AUTHORIZED', 'PAID', 'PARTIALLY_PAID', 'REFUNDED', 'PARTIALLY_REFUNDED', 'VOIDED'];
+const STATUSES = ['PENDING', 'AUTHORIZED', 'PAID', 'PARTIALLY_PAID', 'REFUNDED', 'PARTIALLY_REFUNDED', 'VOIDED'];
 
 export function OrdersPage() {
   const [params, setParams] = useSearchParams();
@@ -72,130 +93,189 @@ export function OrdersPage() {
   }
 
   return (
-    <section>
-      <div className="page-header">
-        <h1>Orders</h1>
-        <div className="actions">
-          <Link to="/orders/new" className="button">
-            Create order
-          </Link>
-          <button type="button" onClick={runSync} disabled={!shopify?.connected}>
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Orders</h1>
+          {shopify?.connected && (
+            <p className="text-sm text-muted-foreground">Connected to {shopify.shopDomain}</p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link to="/orders/new">Create order</Link>
+          </Button>
+          <Button variant="outline" onClick={runSync} disabled={!shopify?.connected}>
+            <RefreshCw className="size-4" />
             Sync from Shopify
-          </button>
+          </Button>
         </div>
       </div>
 
       {shopify && !shopify.connected && (
-        <form className="card connect" onSubmit={connectStore}>
-          <strong>Connect your Shopify store</strong>
-          <input
-            placeholder="yourstore.myshopify.com"
-            value={shopInput}
-            onChange={(e) => setShopInput(e.target.value)}
-            required
-          />
-          <button type="submit">Connect</button>
-        </form>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Connect your Shopify store</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-wrap gap-2" onSubmit={connectStore}>
+              <Input
+                className="max-w-sm"
+                placeholder="yourstore.myshopify.com"
+                value={shopInput}
+                onChange={(e) => setShopInput(e.target.value)}
+                required
+              />
+              <Button type="submit">Connect</Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
-      {shopify?.connected && <p className="muted">Connected to {shopify.shopDomain}</p>}
-      {syncMessage && <p className="notice">{syncMessage}</p>}
 
-      <div className="card filters">
-        <input
-          placeholder="Search order number or customer"
-          defaultValue={search}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') update({ search: (e.target as HTMLInputElement).value.trim() });
-          }}
-          onBlur={(e) => update({ search: e.target.value.trim() })}
-        />
-        <select value={status} onChange={(e) => update({ status: e.target.value })}>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s ? s.replace(/_/g, ' ') : 'All statuses'}
-            </option>
-          ))}
-        </select>
-        <label>
-          From
-          <input type="date" value={startDate} onChange={(e) => update({ startDate: e.target.value })} />
-        </label>
-        <label>
-          To
-          <input type="date" value={endDate} onChange={(e) => update({ endDate: e.target.value })} />
-        </label>
-        <select value={sortBy} onChange={(e) => update({ sortBy: e.target.value })}>
-          <option value="orderDate">Sort by date</option>
-          <option value="totalPrice">Sort by total</option>
-        </select>
-        <select value={sortOrder} onChange={(e) => update({ sortOrder: e.target.value })}>
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
-      </div>
+      {syncMessage && (
+        <p className="rounded-md border bg-background px-4 py-3 text-sm">{syncMessage}</p>
+      )}
 
-      {error && <p className="error">{error}</p>}
-      <div className="card table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th>Payment</th>
-              <th>Fulfillment</th>
-              <th className="right">Total</th>
-              <th>Source</th>
-            </tr>
-          </thead>
-          <tbody>
+      <Card>
+        <CardContent className="grid gap-4 pt-6 md:grid-cols-3 lg:grid-cols-6">
+          <div className="space-y-2">
+            <Label htmlFor="search">Search</Label>
+            <Input
+              id="search"
+              placeholder="Order number or customer"
+              defaultValue={search}
+              key={search}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') update({ search: (e.target as HTMLInputElement).value.trim() });
+              }}
+              onBlur={(e) => update({ search: e.target.value.trim() })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Payment status</Label>
+            <Select value={status || 'all'} onValueChange={(v) => update({ status: v === 'all' ? '' : v })}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s.replace(/_/g, ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="from">From</Label>
+            <Input id="from" type="date" value={startDate} onChange={(e) => update({ startDate: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="to">To</Label>
+            <Input id="to" type="date" value={endDate} onChange={(e) => update({ endDate: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-2 lg:col-span-2">
+            <div className="space-y-2">
+              <Label>Sort by</Label>
+              <Select value={sortBy} onValueChange={(v) => update({ sortBy: v })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="orderDate">Date</SelectItem>
+                  <SelectItem value="totalPrice">Total</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Order</Label>
+              <Select value={sortOrder} onValueChange={(v) => update({ sortOrder: v })}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Payment</TableHead>
+              <TableHead>Fulfillment</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead>Source</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {loading && (
-              <tr>
-                <td colSpan={7} className="muted">
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   Loading…
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
             {!loading && result?.data.length === 0 && (
-              <tr>
-                <td colSpan={7} className="muted">
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
                   No orders found. Try another filter or sync from Shopify.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
             {!loading &&
               result?.data.map((order) => (
-                <tr key={order.id}>
-                  <td>
-                    <Link to={`/orders/${order.id}`}>{order.orderNumber}</Link>
-                  </td>
-                  <td>{formatDate(order.orderDate)}</td>
-                  <td>{order.customerName ?? 'Not available'}</td>
-                  <td>{order.financialStatus ?? 'Not available'}</td>
-                  <td>{order.fulfillmentStatus ?? 'Not available'}</td>
-                  <td className="right">{formatMoney(order.totalPrice, order.currency)}</td>
-                  <td>{order.source}</td>
-                </tr>
+                <TableRow key={order.id}>
+                  <TableCell>
+                    <Link to={`/orders/${order.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+                      {order.orderNumber}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{formatDate(order.orderDate)}</TableCell>
+                  <TableCell>{order.customerName ?? 'Not available'}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{order.financialStatus ?? 'Not available'}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{order.fulfillmentStatus ?? 'Not available'}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">{formatMoney(order.totalPrice, order.currency)}</TableCell>
+                  <TableCell>
+                    <Badge>{order.source === 'CRM' ? 'CRM' : 'Shopify'}</Badge>
+                  </TableCell>
+                </TableRow>
               ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
       {result && result.pagination.totalPages > 1 && (
-        <div className="pagination">
-          <button type="button" disabled={page <= 1} onClick={() => update({ page: String(page - 1) })}>
+        <div className="flex items-center justify-center gap-4">
+          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => update({ page: String(page - 1) })}>
             Previous
-          </button>
-          <span>
+          </Button>
+          <span className="text-sm text-muted-foreground">
             Page {page} of {result.pagination.totalPages} ({result.pagination.total} orders)
           </span>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             disabled={page >= result.pagination.totalPages}
             onClick={() => update({ page: String(page + 1) })}
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
     </section>

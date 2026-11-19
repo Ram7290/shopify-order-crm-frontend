@@ -2,7 +2,7 @@
 
 React single-page app for the Mini Order Management CRM. It talks only to the backend API. Shopify credentials never reach the browser.
 
-- **Stack:** React 19, TypeScript, Vite 7, React Router 7
+- **Stack:** React 19, TypeScript, Vite 7, React Router 7, Tailwind CSS 4, shadcn/ui (Button, Card, Input, Label, Select, Table, Badge)
 - **Pages:** login, orders list (server-side search, filters, sorting, pagination), order details, create order, and a Shopify connection and sync panel
 
 Filters, sort order and page number are stored in the URL, so a filtered view can be shared or refreshed.

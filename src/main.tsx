@@ -7,7 +7,7 @@ import { OrdersPage } from './features/orders/OrdersPage';
 import { OrderDetailPage } from './features/orders/OrderDetailPage';
 import { CreateOrderPage } from './features/orders/CreateOrderPage';
 import { Layout } from './components/Layout';
-import './styles.css';
+import './index.css';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   return getToken() ? <>{children}</> : <Navigate to="/login" replace />;
