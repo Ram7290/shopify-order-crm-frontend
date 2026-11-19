@@ -35,6 +35,7 @@ export function CreateOrderPage() {
   const [lineItems, setLineItems] = useState<LineItemForm[]>([{ variantId: '', quantity: '1' }]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [requestKey] = useState(() => crypto.randomUUID());
 
   function updateLine(index: number, changes: Partial<LineItemForm>) {
     setLineItems((items) => items.map((item, i) => (i === index ? { ...item, ...changes } : item)));
@@ -51,6 +52,7 @@ export function CreateOrderPage() {
     try {
       const created = await api<{ id: string }>('/orders', {
         method: 'POST',
+        headers: { 'Idempotency-Key': requestKey },
         body: {
           customer: { ...customer, phone: customer.phone || undefined },
           lineItems: lineItems.map((item) => ({ variantId: item.variantId.trim(), quantity: Number(item.quantity) })),
