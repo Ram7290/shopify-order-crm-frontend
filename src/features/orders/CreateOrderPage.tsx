@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { api, ApiError } from '../../lib/api';
+import { ProductPicker } from './ProductPicker';
 
 interface LineItemForm {
   variantId: string;
@@ -42,6 +43,10 @@ export function CreateOrderPage() {
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    if (lineItems.some((item) => !item.variantId)) {
+      setError('Choose a product for every line.');
+      return;
+    }
     setSubmitting(true);
     try {
       const created = await api<{ id: string }>('/orders', {
@@ -124,14 +129,11 @@ export function CreateOrderPage() {
             {lineItems.map((item, index) => (
               <div className="flex items-end gap-3 rounded-lg border bg-slate-50/60 p-3" key={index}>
                 <div className="flex-1 space-y-2">
-                  <Label htmlFor={`variant-${index}`}>Variant ID</Label>
-                  <Input
+                  <Label htmlFor={`variant-${index}`}>Product</Label>
+                  <ProductPicker
                     id={`variant-${index}`}
-                    required
-                    placeholder="e.g. 44123456789012"
-                    className="bg-white"
                     value={item.variantId}
-                    onChange={(e) => updateLine(index, { variantId: e.target.value })}
+                    onChange={(variantId) => updateLine(index, { variantId })}
                   />
                 </div>
                 <div className="w-28 space-y-2">

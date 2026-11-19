@@ -120,7 +120,12 @@ export function OrderDetailPage() {
           <TableBody>
             {order.items.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="pl-6 font-medium">{item.title}</TableCell>
+                <TableCell className="pl-6">
+                  <p className="font-medium">{item.title}</p>
+                  {item.shopifyVariantId && (
+                    <p className="text-xs text-slate-500">Variant ID {item.shopifyVariantId.split('/').pop()}</p>
+                  )}
+                </TableCell>
                 <TableCell className="text-slate-500">{item.sku ?? 'Not available'}</TableCell>
                 <TableCell className="text-right tabular-nums">{item.quantity}</TableCell>
                 <TableCell className="text-right tabular-nums">{formatMoney(item.unitPrice, order.currency)}</TableCell>

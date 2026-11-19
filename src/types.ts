@@ -22,6 +22,7 @@ export interface OrderDetail extends OrderListItem {
     id: string;
     title: string;
     sku: string | null;
+    shopifyVariantId: string | null;
     quantity: number;
     unitPrice: string;
     lineTotal: string;
